@@ -10,6 +10,18 @@ const app = express();
 const port = Number(process.env.PORT || 3000);
 const volumePath = process.env.VOLUME_PATH || '/data';
 
+// A line per request, so the Runtime log has something a visitor caused;
+// /stderr answers on the other stream.
+app.use((request, _response, next) => {
+  const stream = request.path === '/stderr' ? console.error : console.log;
+  stream(`${request.method} ${request.originalUrl}`);
+  next();
+});
+
+app.get('/stderr', (_request, response) => {
+  response.send('written to stderr');
+});
+
 app.get('/', (_request, response) => {
   response.send('eris-launch-check-app');
 });
